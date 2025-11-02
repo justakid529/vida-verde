@@ -4,57 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sítio Oliveira — Produtos</title>
-  <style>
-    :root{
-      --green:#15803d;
-      --muted:#6b7280;
-      --card:#ffffff;
-      --bg:#f3f4f6;
-      --radius:12px;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:#111827}
-    header{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:20px 16px}
-    .container{max-width:1100px;margin:0 auto;padding:16px}
-    .brand{display:flex;gap:12px;align-items:center}
-    h1{margin:0;font-size:20px}
-    p.lead{margin:0;color:var(--muted);font-size:13px}
-
-    /* layout */
-    .layout{display:grid;grid-template-columns:1fr;gap:16px;padding:16px 0}
-    @media(min-width:1024px){ .layout{grid-template-columns:300px 1fr} }
-
-    /* sidebar */
-    .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-    .categories button{display:block;width:100%;text-align:left;padding:10px;border-radius:8px;border:0;background:transparent;cursor:pointer}
-    .categories button.active{background:#ecfdf5;font-weight:600;color:var(--green)}
-    .search{display:flex;gap:8px;align-items:center;margin-top:8px}
-    .search input{flex:1;padding:8px;border-radius:8px;border:1px solid #e5e7eb}
-
-    /* products grid */
-    .products-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:12px}
-    @media(min-width:640px){ .products-grid{grid-template-columns:repeat(2,1fr)} }
-    @media(min-width:1024px){ .products-grid{grid-template-columns:repeat(3,1fr)} }
-
-    .product{
-      background:var(--card);border-radius:12px;padding:12px;display:flex;flex-direction:column;height:100%;
-      box-shadow:0 1px 4px rgba(0,0,0,0.04)
-    }
-    .thumb{height:120px;background:#f8fafc;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;margin-bottom:10px}
-    .meta{font-size:13px;color:var(--muted);margin-bottom:6px}
-    .price{font-weight:700;font-size:18px}
-    .actions{display:flex;gap:8px;margin-top:10px;align-items:center}
-    .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
-    .btn.add{background:var(--green);color:#fff}
-    .btn.ghost{background:#f3f4f6}
-
-    /* cart summary */
-    .cart-item{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px dashed #eef2f7}
-    .qty-controls button{padding:6px 8px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
-
-    footer{padding:20px;text-align:center;color:var(--muted);font-size:13px}
-  </style>
+  <link rel="stylesheet" href="stylesheet.css">
+ 
 </head>
 <body>
   <header>
@@ -333,6 +284,36 @@
     window.removeFromCart = removeFromCart;
     window.checkout = checkout;
     window.viewDetails = viewDetails;
+
+
+
+
+
+
+
+    const forma_pagamento = document.getElementById("forma_pagamento").value;
+const data_retirada = document.getElementById("data_retirada").value;
+
+// suponha que você tenha um array "carrinho" com {produto_id, quantidade}
+fetch("api.php", {
+  method: "POST",
+  headers: {"Content-Type": "application/x-www-form-urlencoded"},
+  body: new URLSearchParams({
+    acao: "salvar_pedido",
+    forma_pagamento,
+    data_retirada,
+    itens: JSON.stringify(carrinho)
+  })
+})
+.then(res => res.json())
+.then(dados => {
+  if (dados.status === "sucesso") {
+    alert("Pedido salvo com sucesso! ID: " + dados.pedido_id);
+  } else {
+    alert("Erro ao salvar pedido.");
+  }
+});
+
   </script>
 </body>
 </html>
