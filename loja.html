@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sítio Oliveira — Produtos</title>
+  <style>
+    :root{
+      --green:#15803d;
+      --muted:#6b7280;
+      --card:#ffffff;
+      --bg:#f3f4f6;
+      --radius:12px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#111827}
+    header{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:20px 16px}
+    .container{max-width:1100px;margin:0 auto;padding:16px}
+    .brand{display:flex;gap:12px;align-items:center}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    /* layout */
+    .layout{display:grid;grid-template-columns:1fr;gap:16px;padding:16px 0}
+    @media(min-width:1024px){ .layout{grid-template-columns:300px 1fr} }
+
+    /* sidebar */
+    .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+    .categories button{display:block;width:100%;text-align:left;padding:10px;border-radius:8px;border:0;background:transparent;cursor:pointer}
+    .categories button.active{background:#ecfdf5;font-weight:600;color:var(--green)}
+    .search{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .search input{flex:1;padding:8px;border-radius:8px;border:1px solid #e5e7eb}
+
+    /* products grid */
+    .products-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:12px}
+    @media(min-width:640px){ .products-grid{grid-template-columns:repeat(2,1fr)} }
+    @media(min-width:1024px){ .products-grid{grid-template-columns:repeat(3,1fr)} }
+
+    .product{
+      background:var(--card);border-radius:12px;padding:12px;display:flex;flex-direction:column;height:100%;
+      box-shadow:0 1px 4px rgba(0,0,0,0.04)
+    }
+    .thumb{height:120px;background:#f8fafc;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;margin-bottom:10px}
+    .meta{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .price{font-weight:700;font-size:18px}
+    .actions{display:flex;gap:8px;margin-top:10px;align-items:center}
+    .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn.add{background:var(--green);color:#fff}
+    .btn.ghost{background:#f3f4f6}
+
+    /* cart summary */
+    .cart-item{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px dashed #eef2f7}
+    .qty-controls button{padding:6px 8px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+
+    footer{padding:20px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container brand">
+      <div>
+        <h1>Sítio Oliveira — Produtos</h1>
+        <p class="lead">Produtos frescos direto do produtor</p>
+      </div>
+
+      <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
+        <div style="text-align:right">
+          <div style="font-size:12px;color:var(--muted)">Carrinho</div>
+          <div id="cart-count" style="font-weight:700">0 itens</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <!-- Sidebar -->
+      <aside class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong>Categorias</strong>
+          <small id="show-count" style="color:var(--muted)">Mostrando todos</small>
+        </div>
+
+        <div class="categories" style="margin-bottom:12px">
+          <button class="active" data-cat="Todos">Todos</button>
+          <button data-cat="Hortaliças">Hortaliças</button>
+          <button data-cat="Frutas">Frutas</button>
+          <button data-cat="Legumes">Legumes</button>
+        </div>
+
+        <div>
+          <label style="font-size:13px;color:var(--muted)">Buscar</label>
+          <div class="search">
+            <input id="search" placeholder="Ex.: alface, banana, tomate" />
+            <button id="clear-search" class="btn ghost">Limpar</button>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <h4 style="margin:0 0 8px 0">Resumo do carrinho</h4>
+          <div id="cart-contents">
+            <p style="color:var(--muted);font-size:13px">Seu carrinho está vazio.</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Products + grid -->
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <h3 style="margin:0">Produtos</h3>
+            <div id="result-info" style="color:var(--muted);font-size:13px">Mostrando 0 produtos</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <!-- small search for mobile -->
+            <input id="search-mobile" placeholder="Buscar" style="padding:8px;border-radius:8px;border:1px solid #e5e7eb;display:none" />
+          </div>
+        </div>
+
+        <div class="products-grid" id="products"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    © <span id="year"></span> Sítio Oliveira — Catálogo
+  </footer>
+
+  <script>
+    // produto(s) conforme lista do usuário
+    const PRODUCTS = [
+      // HORTALIÇAS
+      { id:1, category:'Hortaliças', name:'Alface Crespa', price:4.00, unit:'un' },
+      { id:2, category:'Hortaliças', name:'Alface Americana', price:4.00, unit:'un' },
+      { id:3, category:'Hortaliças', name:'Alface Mimosa', price:4.00, unit:'un' },
+      { id:4, category:'Hortaliças', name:'Alface Roxa', price:4.00, unit:'un' },
+      { id:5, category:'Hortaliças', name:'Alface Lisa', price:4.00, unit:'un' },
+      { id:6, category:'Hortaliças', name:'Escarola', price:4.00, unit:'un' },
+      { id:7, category:'Hortaliças', name:'Espinafre', price:4.00, unit:'maço' },
+      { id:8, category:'Hortaliças', name:'Salsinha', price:3.50, unit:'maço' },
+      { id:9, category:'Hortaliças', name:'Cebolinha', price:3.50, unit:'maço' },
+
+      // FRUTAS
+      { id:10, category:'Frutas', name:'Banana Nanica', price:7.50, unit:'kg' },
+      { id:11, category:'Frutas', name:'Banana Prata (800g)', price:9.00, unit:'800g' },
+      { id:12, category:'Frutas', name:'Maçã Pink (500g)', price:12.90, unit:'500g' },
+      { id:13, category:'Frutas', name:'Maçã Gala (500g)', price:12.90, unit:'500g' },
+      { id:14, category:'Frutas', name:'Mamão Formosa', price:16.00, unit:'un' },
+
+      // LEGUMES
+      { id:15, category:'Legumes', name:'Abóbora Cabotiã', price:9.90, unit:'kg' },
+      { id:16, category:'Legumes', name:'Abobrinha Italiana (500g)', price:7.00, unit:'500g' },
+      { id:17, category:'Legumes', name:'Batata Inglesa (500g)', price:7.50, unit:'500g' },
+      { id:18, category:'Legumes', name:'Batata Doce (500g)', price:7.00, unit:'500g' },
+      { id:19, category:'Legumes', name:'Beterraba (500g)', price:7.50, unit:'500g' },
+      { id:20, category:'Legumes', name:'Cenoura (500g)', price:7.50, unit:'500g' },
+      { id:21, category:'Legumes', name:'Cebola (500g)', price:7.00, unit:'500g' },
+      { id:22, category:'Legumes', name:'Inhame (500g)', price:8.00, unit:'500g' },
+      { id:23, category:'Legumes', name:'Tomate Grape (180g)', price:6.50, unit:'180g' },
+      { id:24, category:'Legumes', name:'Tomate Italiano (500g)', price:8.50, unit:'500g' }
+    ];
+
+    // state
+    let currentCategory = 'Todos';
+    let query = '';
+    let cart = []; // {id, qty}
+
+    // helpers
+    const money = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+    // render products
+    const productsEl = document.getElementById('products');
+    const resultInfo = document.getElementById('result-info');
+    const showCount = document.getElementById('show-count');
+    const cartCountEl = document.getElementById('cart-count');
+    const cartContents = document.getElementById('cart-contents');
+    const yearEl = document.getElementById('year');
+
+    yearEl.textContent = new Date().getFullYear();
+
+    function filteredProducts(){
+      return PRODUCTS.filter(p=>{
+        const byCat = currentCategory === 'Todos' ? true : p.category === currentCategory;
+        const byQuery = p.name.toLowerCase().includes(query.toLowerCase());
+        return byCat && byQuery;
+      });
+    }
+
+    function renderProducts(){
+      const items = filteredProducts();
+      productsEl.innerHTML = '';
+      resultInfo.textContent = `Mostrando ${items.length} produto(s)`;
+      showCount.textContent = currentCategory === 'Todos' ? 'Mostrando todos' : `Categoria: ${currentCategory}`;
+
+      items.forEach(p=>{
+        const card = document.createElement('article');
+        card.className = 'product';
+
+        card.innerHTML = `
+          <div class="thumb">Imagem</div>
+          <div style="flex:1">
+            <h4 style="margin:0 0 6px 0">${p.name}</h4>
+            <div class="meta">${p.category} • ${p.unit}</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+            <div class="price">${money(p.price)}</div>
+            <div class="actions">
+              <button class="btn ghost" onclick="viewDetails(${p.id})">Detalhes</button>
+              <button class="btn add" onclick="addToCart(${p.id})">Adicionar</button>
+            </div>
+          </div>
+        `;
+        productsEl.appendChild(card);
+      });
+    }
+
+    // categories
+    document.querySelectorAll('.categories button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.categories button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.dataset.cat;
+        renderProducts();
+      });
+    });
+
+    // search
+    const searchInput = document.getElementById('search');
+    searchInput.addEventListener('input', e=>{
+      query = e.target.value.trim();
+      renderProducts();
+    });
+    document.getElementById('clear-search').addEventListener('click', ()=>{
+      query = '';
+      searchInput.value = '';
+      renderProducts();
+    });
+
+    // cart functions
+    function addToCart(id){
+      const item = cart.find(c=>c.id===id);
+      if(item) item.qty++;
+      else cart.push({id:id, qty:1});
+      renderCart();
+    }
+
+    function removeFromCart(id){
+      cart = cart.filter(c=>c.id!==id);
+      renderCart();
+    }
+
+    function changeQty(id, delta){
+      const item = cart.find(c=>c.id===id);
+      if(!item) return;
+      item.qty += delta;
+      if(item.qty < 1) removeFromCart(id);
+      renderCart();
+    }
+
+    function cartTotal(){
+      return cart.reduce((sum,c)=>{
+        const p = PRODUCTS.find(x=>x.id===c.id);
+        return sum + (p.price * c.qty);
+      },0);
+    }
+
+    function renderCart(){
+      cartCountEl.textContent = `${cart.reduce((s,i)=>s+i.qty,0)} item(s)`;
+      if(cart.length === 0){
+        cartContents.innerHTML = `<p style="color:var(--muted);font-size:13px">Seu carrinho está vazio.</p>`;
+        return;
+      }
+      cartContents.innerHTML = '';
+      cart.forEach(entry=>{
+        const p = PRODUCTS.find(x=>x.id===entry.id);
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600">${p.name}</div>
+            <div style="font-size:12px;color:var(--muted)">${entry.qty} x ${money(p.price)} </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <div class="qty-controls" style="display:flex;gap:6px">
+              <button onclick="changeQty(${p.id},-1)">-</button>
+              <button onclick="changeQty(${p.id},1)">+</button>
+            </div>
+            <div style="font-weight:700">${money(p.price * entry.qty)}</div>
+            <button style="background:transparent;border:0;color:#ef4444;cursor:pointer;font-size:12px;padding:0" onclick="removeFromCart(${p.id})">Remover</button>
+          </div>
+        `;
+        cartContents.appendChild(div);
+      });
+
+      const footer = document.createElement('div');
+      footer.style.marginTop = '10px';
+      footer.innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-weight:700;padding-top:8px;border-top:1px solid #eef2f7">
+          <div>Total</div>
+          <div>${money(cartTotal())}</div>
+        </div>
+        <div style="margin-top:8px">
+          <button onclick="checkout()" class="btn add" style="width:100%">Finalizar compra</button>
+        </div>
+      `;
+      cartContents.appendChild(footer);
+    }
+
+    function checkout(){
+      if(cart.length === 0){ alert('Seu carrinho está vazio.'); return; }
+      // simulação de checkout — personalizar conforme necessário
+      const summary = cart.map(c=>{
+        const p = PRODUCTS.find(x=>x.id===c.id);
+        return `${p.name} — ${c.qty} x ${money(p.price)} = ${money(p.price * c.qty)}`;
+      }).join('\n');
+      const total = money(cartTotal());
+      alert('Resumo do pedido:\\n\\n' + summary + '\\n\\nTotal: ' + total + '\\n\\n(Implementar integração de pagamento conforme necessário.)');
+    }
+
+    function viewDetails(id){
+      const p = PRODUCTS.find(x=>x.id===id);
+      alert(`${p.name}\\nCategoria: ${p.category}\\nUnidade: ${p.unit}\\nPreço: ${money(p.price)}`);
+    }
+
+    // initial render
+    renderProducts();
+    renderCart();
+
+    // make renderProducts global so category buttons can call (already wired)
+    window.addToCart = addToCart;
+    window.changeQty = changeQty;
+    window.removeFromCart = removeFromCart;
+    window.checkout = checkout;
+    window.viewDetails = viewDetails;
+  </script>
+</body>
+</html>
